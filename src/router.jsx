@@ -1,8 +1,8 @@
 import { createBrowserRouter } from "react-router";
-import HomeLayout from "./assets/layouts/HomeLayout";
-import Home from "./assets/pages/Home";
-import Login from "./assets/pages/Login";
-import Register from "./assets/pages/Register";
+import HomeLayout from "./layouts/HomeLayout";
+import Home from "./pages/Home";
+import Login from "./pages/Login";
+import Register from "./pages/Register";
 const router = createBrowserRouter([
   {
     path: "/",
