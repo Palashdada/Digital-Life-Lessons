@@ -14,39 +14,54 @@ const Register = () => {
     formState: { errors },
   } = useForm();
 
-  const onSubmit = (data) => {
-    const { name, email, photoURL, password } = data;
-
-    // Password validation
-    const hasUpper = /[A-Z]/.test(password);
-    const hasLower = /[a-z]/.test(password);
-    const hasLength = password.length >= 6;
-
-    if (!hasUpper || !hasLower || !hasLength) {
-      return Swal.fire(
-        "Invalid Password",
-        "Password must contain uppercase, lowercase, and at least 6 characters",
-        "error"
-      );
-    }
-
-    createUser(email, password)
-      .then((res) => {
-        // Update profile
-        res.user.updateProfile({ displayName: name, photoURL });
-        Swal.fire("Success", "Account created successfully", "success");
-        navigate("/dashboard");
-      })
-      .catch((err) => Swal.fire("Error", err.message, "error"));
+  const validatePassword = (value) => {
+    const uppercase = /[A-Z]/.test(value);
+    const lowercase = /[a-z]/.test(value);
+    const minLength = value.length >= 6;
+    if (!uppercase) return "Password must contain at least 1 uppercase letter";
+    if (!lowercase) return "Password must contain at least 1 lowercase letter";
+    if (!minLength) return "Password must be at least 6 characters long";
+    return true;
   };
 
-  const handleGoogleRegister = () => {
+  const onSubmit = (data) => {
+    createUser(data.email, data.password)
+      .then(() => {
+        Swal.fire({
+          icon: "success",
+          title: "Account created successfully!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        navigate("/login");
+      })
+      .catch((error) => {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: error.message,
+        });
+      });
+  };
+
+  const handleGoogleLogin = () => {
     loginWithGoogle()
       .then(() => {
-        Swal.fire("Success", "Logged in with Google", "success");
-        navigate("/dashboard");
+        Swal.fire({
+          icon: "success",
+          title: "Logged in with Google!",
+          showConfirmButton: false,
+          timer: 1500,
+        });
+        navigate("/");
       })
-      .catch((err) => Swal.fire("Error", err.message, "error"));
+      .catch((error) => {
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: error.message,
+        });
+      });
   };
 
   return (
@@ -55,45 +70,63 @@ const Register = () => {
         <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
-          <input
-            type="text"
-            placeholder="Full Name"
-            className="input input-bordered w-full"
-            {...register("name", { required: "Name is required" })}
-          />
-          {errors.name && (
-            <p className="text-red-500 text-sm">{errors.name.message}</p>
-          )}
+          {/* Name */}
+          <div className="form-control">
+            <input
+              type="text"
+              placeholder="Full Name"
+              className="input input-bordered w-full"
+              {...register("name", { required: "Name is required" })}
+            />
+            {errors.name && (
+              <span className="text-red-500 text-sm">
+                {errors.name.message}
+              </span>
+            )}
+          </div>
 
-          <input
-            type="email"
-            placeholder="Email"
-            className="input input-bordered w-full"
-            {...register("email", { required: "Email is required" })}
-          />
-          {errors.email && (
-            <p className="text-red-500 text-sm">{errors.email.message}</p>
-          )}
+          {/* Photo URL */}
+          <div className="form-control">
+            <input
+              type="text"
+              placeholder="Photo URL"
+              className="input input-bordered w-full"
+              {...register("photoURL")}
+            />
+          </div>
 
-          <input
-            type="text"
-            placeholder="Photo URL"
-            className="input input-bordered w-full"
-            {...register("photoURL", { required: "Photo URL is required" })}
-          />
-          {errors.photoURL && (
-            <p className="text-red-500 text-sm">{errors.photoURL.message}</p>
-          )}
+          {/* Email */}
+          <div className="form-control">
+            <input
+              type="email"
+              placeholder="Email"
+              className="input input-bordered w-full"
+              {...register("email", { required: "Email is required" })}
+            />
+            {errors.email && (
+              <span className="text-red-500 text-sm">
+                {errors.email.message}
+              </span>
+            )}
+          </div>
 
-          <input
-            type="password"
-            placeholder="Password"
-            className="input input-bordered w-full"
-            {...register("password", { required: "Password is required" })}
-          />
-          {errors.password && (
-            <p className="text-red-500 text-sm">{errors.password.message}</p>
-          )}
+          {/* Password */}
+          <div className="form-control">
+            <input
+              type="password"
+              placeholder="Password"
+              className="input input-bordered w-full"
+              {...register("password", {
+                required: "Password is required",
+                validate: validatePassword,
+              })}
+            />
+            {errors.password && (
+              <span className="text-red-500 text-sm">
+                {errors.password.message}
+              </span>
+            )}
+          </div>
 
           <button type="submit" className="btn btn-primary w-full mt-4">
             Register
@@ -101,7 +134,7 @@ const Register = () => {
         </form>
 
         <button
-          onClick={handleGoogleRegister}
+          onClick={handleGoogleLogin}
           className="btn btn-outline w-full mt-2"
         >
           Register with Google
