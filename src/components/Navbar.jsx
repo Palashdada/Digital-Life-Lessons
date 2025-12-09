@@ -14,16 +14,19 @@ const Navbar = () => {
 
   return (
     <div className="navbar bg-base-100 shadow-md px-6">
+      {/* Left Section */}
       <div className="flex-1">
-        <Link to="/" className="text-2xl font-bold">
+        <Link to="/" className="text-xl font-bold">
           Digital Life Lessons
         </Link>
       </div>
 
-      <div className="flex-none gap-3">
+      {/* Right Section */}
+      <div className="flex-none gap-4">
         <NavLink to="/" className="btn btn-ghost">
           Home
         </NavLink>
+
         <NavLink to="/public-lessons" className="btn btn-ghost">
           Public Lessons
         </NavLink>
@@ -67,8 +70,12 @@ const Navbar = () => {
                 />
               </div>
             </label>
+
             {isDropdownOpen && (
-              <ul className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52">
+              <ul
+                tabIndex={0}
+                className="menu menu-compact dropdown-content mt-3 p-2 shadow bg-base-100 rounded-box w-52"
+              >
                 <li>
                   <span>{user.displayName || "User"}</span>
                 </li>

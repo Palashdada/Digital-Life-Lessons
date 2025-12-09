@@ -1,51 +1,49 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { auth, googleProvider } from "../firebase";
+import { createContext, useEffect, useState } from "react";
 import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
+  getAuth,
   onAuthStateChanged,
+  GoogleAuthProvider,
   signInWithPopup,
+  signOut,
 } from "firebase/auth";
+import { app } from "../firebase/firebase.config";
 
-const AuthContext = createContext();
+export const AuthContext = createContext(null);
+const auth = getAuth(app);
 
-export const useAuth = () => useContext(AuthContext);
-
-export const AuthProvider = ({ children }) => {
+export default function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Listen for auth state changes
+  const googleProvider = new GoogleAuthProvider();
+
+  const googleLogin = () => {
+    setLoading(true);
+    return signInWithPopup(auth, googleProvider);
+  };
+
+  const logOut = () => {
+    setLoading(true);
+    return signOut(auth);
+  };
+
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       setLoading(false);
     });
-    return unsubscribe;
+
+    return () => unsubscribe();
   }, []);
 
-  // Register
-  const register = (email, password) => {
-    return createUserWithEmailAndPassword(auth, email, password);
+  const authInfo = {
+    user,
+    loading,
+    googleLogin,
+    logOut,
   };
 
-  // Login
-  const login = (email, password) => {
-    return signInWithEmailAndPassword(auth, email, password);
-  };
-
-  // Login with Google
-  const loginWithGoogle = () => {
-    return signInWithPopup(auth, googleProvider);
-  };
-
-  // Logout
-  const logout = () => {
-    return signOut(auth);
-  };
-
-  const value = { user, loading, register, login, loginWithGoogle, logout };
-
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
-};
+  return (
+    <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
+  );
+}
